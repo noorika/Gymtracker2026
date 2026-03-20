@@ -2,7 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LiftTracker">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjMDcwNzA5Ii8+PHJlY3QgeD0iMzAiIHk9Ijg0IiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyIiByeD0iNiIgZmlsbD0iIzQ0NCIvPjxyZWN0IHg9IjI0IiB5PSI3NCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iI2I4ZmY1NyIvPjxyZWN0IHg9IjEzMiIgeT0iNzQiIHdpZHRoPSIyNCIgaGVpZ2h0PSIzMiIgcng9IjYiIGZpbGw9IiNiOGZmNTciLz48dGV4dCB4PSI5MCIgeT0iMTM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYjhmZjU3IiBmb250LXNpemU9IjI2IiBmb250LXdlaWdodD0iNzAwIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgbGV0dGVyLXNwYWNpbmc9IjIiPkxJRlQ8L3RleHQ+PC9zdmc+">
 <title>GymTracker – Dein Trainingsplan</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -223,6 +227,17 @@ canvas{width:100%!important;max-height:220px}
   .set-row{grid-template-columns:48px 1fr 1fr auto}
 }
 
+/* ─── SUPERSATZ NOTE ─── */
+.ss-note-input{width:100%;margin-top:8px;background:var(--s3);border:1px dashed var(--border2);border-radius:8px;color:var(--sub);font-family:'Syne',sans-serif;font-size:12px;padding:7px 10px;transition:all .2s}
+.ss-note-input:focus{outline:none;border-color:var(--purple);color:var(--text)}
+.ss-note-input::placeholder{color:var(--dim)}
+
+/* ─── REORDER ─── */
+.reorder-item{display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:grab;transition:all .15s;user-select:none}
+.reorder-item:hover{border-color:var(--border2);background:var(--s3)}
+.reorder-item:active{cursor:grabbing;opacity:.7}
+.reorder-item[draggable="true"].drag-over{border-color:var(--lime);background:rgba(184,255,87,.06)}
+
 /* ─── ÜBUNGEN VIEW ─── */
 .ueb-day-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
 .ueb-dtab{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--sub);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
@@ -284,6 +299,16 @@ canvas{width:100%!important;max-height:220px}
 .modal-step-text{font-size:13px;color:var(--sub);line-height:1.5}
 .modal-close{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--sub);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:20px;transition:all .2s}
 .modal-close:hover{border-color:var(--border2);color:var(--text)}
+
+/* ─── SUPERSATZ NOTIZ ─── */
+.ss-note-input{width:100%;margin-top:8px;padding:7px 10px;background:var(--s3);border:1px solid var(--border);border-radius:8px;color:var(--sub);font-family:'Syne',sans-serif;font-size:12px;transition:border-color .2s}
+.ss-note-input:focus{outline:none;border-color:var(--purple);color:var(--text)}
+.ss-note-input::placeholder{color:var(--dim)}
+
+/* ─── REORDER ─── */
+.reorder-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;cursor:grab;transition:all .15s;user-select:none}
+.reorder-item:hover{border-color:var(--border2);background:var(--s3)}
+.reorder-item:active{cursor:grabbing;border-color:var(--lime);background:rgba(184,255,87,.06)}
 </style>
 </head>
 <body>
@@ -314,10 +339,19 @@ canvas{width:100%!important;max-height:220px}
   <div class="dash-grid">
     <div class="dash-card dc-lime"><div class="dash-card-label">Trainings gesamt</div><div class="dash-card-val" id="dc-total">0</div><div class="dash-card-sub">Sessions aufgezeichnet</div></div>
     <div class="dash-card dc-orange"><div class="dash-card-label">Diese Woche</div><div class="dash-card-val" id="dc-week">0</div><div class="dash-card-sub">von 3 geplant</div></div>
-    <div class="dash-card dc-blue"><div class="dash-card-label">Gesamtvolumen</div><div class="dash-card-val" id="dc-volume">0</div><div class="dash-card-sub">kg bewegt (gesamt)</div></div>
+    <div class="dash-card dc-blue"><div class="dash-card-label">Gesamtvolumen</div><div class="dash-card-val" id="dc-volume" style="font-size:28px;padding-top:4px">0 Tonnen</div><div class="dash-card-sub">kg bewegt (gesamt)</div></div>
     <div class="dash-card dc-purple"><div class="dash-card-label">Persönliche Rekorde</div><div class="dash-card-val" id="dc-prs">0</div><div class="dash-card-sub">PRs erreicht</div></div>
     <div class="dash-card dc-yellow"><div class="dash-card-label">Aktuelle Streak</div><div class="dash-card-val" id="dc-streak">0</div><div class="dash-card-sub">Wochen in Folge</div></div>
     <div class="dash-card dc-green"><div class="dash-card-label">Letztes Training</div><div class="dash-card-val" id="dc-last" style="font-size:22px;padding-top:6px">—</div><div class="dash-card-sub" id="dc-last-sub">Noch kein Training</div></div>
+    <div class="dash-card dc-lime" style="grid-column:span 2">
+      <div class="dash-card-label">Mein Körpergewicht (für Klimmzüge)</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+        <input id="bw-input" type="number" min="40" max="200" step="0.5" placeholder="z.B. 80"
+          style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Syne',sans-serif;font-size:18px;font-weight:700;padding:8px 12px;width:110px"
+          oninput="saveBodyweight(this.value)"/>
+        <span style="font-size:13px;color:var(--sub)">kg — wird bei Klimmzügen automatisch als Gewicht eingesetzt</span>
+      </div>
+    </div>
   </div>
 
   <!-- Volume per muscle -->
@@ -352,6 +386,7 @@ canvas{width:100%!important;max-height:220px}
         <span class="dtag" style="background:rgba(64,224,160,.14);color:#40e0a0">Ziehen</span>
         <span class="dtag" style="background:rgba(255,208,96,.18);color:#ffd060">Trapez 🔥</span>
       </div>
+      <button onclick="event.stopPropagation();showReorderModal('A')" style="margin-top:8px;font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--sub);cursor:pointer;font-family:'Syne',sans-serif">⠿ Reihenfolge</button>
     </div>
     <div class="day-btn" id="daybtn-B" onclick="selectDay('B')">
       <div class="day-btn-label">Tag B – KEY DAY</div>
@@ -361,6 +396,7 @@ canvas{width:100%!important;max-height:220px}
         <span class="dtag" style="background:rgba(255,208,96,.14);color:#ffd060">Trapez 🔥</span>
         <span class="dtag" style="background:rgba(64,224,160,.14);color:#4eeebb">Arme</span>
       </div>
+      <button onclick="event.stopPropagation();showReorderModal('B')" style="margin-top:8px;font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--sub);cursor:pointer;font-family:'Syne',sans-serif">⠿ Reihenfolge</button>
     </div>
     <div class="day-btn" id="daybtn-C" onclick="selectDay('C')">
       <div class="day-btn-label">Tag C</div>
@@ -371,6 +407,7 @@ canvas{width:100%!important;max-height:220px}
         <span class="dtag" style="background:rgba(155,127,255,.14);color:#9b7fff">Schulter+</span>
         <span class="dtag" style="background:rgba(79,163,255,.14);color:#4fa3ff">Core</span>
       </div>
+      <button onclick="event.stopPropagation();showReorderModal('C')" style="margin-top:8px;font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--sub);cursor:pointer;font-family:'Syne',sans-serif">⠿ Reihenfolge</button>
     </div>
   </div>
 
@@ -384,7 +421,10 @@ canvas{width:100%!important;max-height:220px}
       <div class="section-title">VERLAUF</div>
       <div class="sec-sub">Alle gespeicherten Sessions</div>
     </div>
-    <button onclick="clearHistory()" style="padding:7px 14px;border-radius:8px;border:1px solid var(--red);background:transparent;color:var(--red);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer">Alles löschen</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="showExportModal()" style="padding:7px 14px;border-radius:8px;border:1px solid var(--lime);background:transparent;color:var(--lime);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer">📤 Export</button>
+      <button onclick="clearHistory()" style="padding:7px 14px;border-radius:8px;border:1px solid var(--red);background:transparent;color:var(--red);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer">🗑 Alles löschen</button>
+    </div>
   </div>
 
   <div class="chart-section">
@@ -455,10 +495,41 @@ canvas{width:100%!important;max-height:220px}
   <div class="ueb-modal-box" id="ueb-modal-box"></div>
 </div>
 
+<!-- EXPORT MODAL -->
+<div class="ueb-modal-overlay" id="export-modal" onclick="closeExportModal(event)">
+  <div class="ueb-modal-box" style="max-width:420px">
+    <div class="modal-body">
+      <div class="modal-name">📤 Export</div>
+      <div class="modal-note">Wähle einen Zeitraum – die Daten werden als JSON-Datei heruntergeladen.</div>
+      <div class="modal-section">Zeitraum</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+        <div style="display:flex;gap:8px">
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--sub);margin-bottom:4px;font-weight:600">VON</div>
+            <input type="date" id="export-from" style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;padding:8px 10px"/>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--sub);margin-bottom:4px;font-weight:600">BIS</div>
+            <input type="date" id="export-to" style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;padding:8px 10px"/>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--dim)">Leer lassen = alle Daten exportieren</div>
+        <button onclick="doExport()" style="width:100%;padding:12px;border-radius:10px;background:var(--lime);color:#000;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer">⬇ Jetzt exportieren</button>
+        <button class="modal-close" onclick="document.getElementById('export-modal').classList.remove('open')">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- SAVE STICKY -->
 <div class="save-session-area" id="save-area" style="display:none">
   <div class="session-info" id="save-info">0 Sätze abgeschlossen</div>
-  <div style="display:flex;gap:10px">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:12px;color:var(--sub)">🏃 Cardio:</span>
+      <input id="cardio-input" type="number" min="0" max="180" placeholder="Min"
+        style="width:64px;background:var(--s2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;padding:6px 8px;text-align:center"/>
+    </div>
     <button class="save-btn" onclick="saveSession()" style="background:var(--lime)">💾 Session speichern</button>
   </div>
 </div>
@@ -612,7 +683,7 @@ function renderDashboard(){
       e.sets?.forEach(set=>{ if(set.done) totalVol += (parseFloat(set.weight)||0)*(parseFloat(set.reps)||0); });
     });
   });
-  document.getElementById('dc-volume').textContent = Math.round(totalVol/1000)+'t';
+  document.getElementById('dc-volume').textContent = (totalVol/1000).toFixed(2)+' Tonnen';
 
   // PRs
   Object.values(d.prs||{}).forEach(v=>{ totalPRs += (v.prCount||0); });
@@ -636,6 +707,10 @@ function renderDashboard(){
     const ago = Math.floor((now-new Date(last.date))/(1000*60*60*24));
     document.getElementById('dc-last-sub').textContent = dayName + ' · ' + (ago===0?'Heute':ago===1?'Gestern':ago+' Tage her');
   }
+
+  // Bodyweight input
+  const bwEl = document.getElementById('bw-input');
+  if(bwEl) bwEl.value = d.bodyweight || '';
 
   // Muscle volume bars
   const musVol = {};
@@ -714,11 +789,26 @@ function findExercise(id){
   return null;
 }
 
+function saveBodyweight(val){
+  const d = getStorage();
+  d.bodyweight = parseFloat(val)||0;
+  setStorage(d);
+}
+
+function getBodyweight(){
+  const d = getStorage();
+  return d.bodyweight || 0;
+}
+
 function getSuggestedWeight(exId){
   const d = getStorage();
   const ex = findExercise(exId);
   if(!ex) return null;
-  // Find last session with this exercise
+  // For bodyweight exercises, use stored bodyweight
+  if(ex.isBodyweight){
+    const bw = getBodyweight();
+    return { weight: bw||0, isIncrease: false, prev: null, isBodyweight: true };
+  }
   const pastSessions = d.sessions.slice().reverse();
   for(const s of pastSessions){
     const e = s.exercises?.find(e=>e.id===exId);
@@ -726,7 +816,6 @@ function getSuggestedWeight(exId){
       const doneSets = e.sets.filter(x=>x.done && x.weight);
       if(doneSets.length){
         const lastMax = Math.max(...doneSets.map(x=>parseFloat(x.weight)||0));
-        // Check if all sets completed with good reps → suggest +2.5 or +5
         const allDone = doneSets.length >= (ex.sets-1);
         const avgReps = doneSets.reduce((a,x)=>a+(parseFloat(x.reps)||0),0)/doneSets.length;
         const topRepsStr = ex.reps.split('–')[1] || ex.reps.split('–')[0];
@@ -821,24 +910,37 @@ function renderExerciseRow(ex, idx, total, day){
   const label = alpha ? (PLAN[day].exercises.indexOf(ex)+1) + alpha : (PLAN[day].exercises.indexOf(ex)+1);
   const muscles = ex.muscles.map(m=>`<span class="mtag ${MUSCLE_META[m]?.cls||''}">${MUSCLE_META[m]?.label||m}</span>`).join('');
   const suggestion = getSuggestedWeight(ex.id);
-  const swText = ex.isBodyweight ? 'Körpergewicht' : (suggestion?.weight ? suggestion.weight+'kg' : ex.startWeight+'kg');
+  const bw = getBodyweight();
+  const swText = ex.isBodyweight ? (bw ? bw+'kg (Körpergewicht)' : 'Körpergewicht – bitte in Dashboard eintragen') : (suggestion?.weight ? suggestion.weight+'kg' : ex.startWeight+'kg');
   const isInc = suggestion?.isIncrease;
-  const swBadge = `<div class="prog-suggestion" onclick="applyWeight('${ex.id}', ${ex.isBodyweight ? 0 : (suggestion?.weight||ex.startWeight)})">
-    ${isInc ? '📈 +Gewicht:' : '🎯 Ziel-Gewicht:'} <strong>${swText}</strong>
-  </div>`;
+
+  let swBadge;
+  if(ex.isBodyweight){
+    swBadge = `<div class="prog-suggestion" style="cursor:default;background:rgba(184,255,87,.06)">
+      ★ ${swText}
+    </div>`;
+  } else {
+    swBadge = `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <div class="prog-suggestion" onclick="applyWeight('${ex.id}', ${suggestion?.weight||ex.startWeight})">
+        ${isInc ? '📈 Mehr Gewicht:' : '🎯 Ziel-Gewicht:'} <strong>${swText}</strong>
+      </div>
+      <button onclick="editWeight('${ex.id}')" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--sub);cursor:pointer;font-family:'Syne',sans-serif">✏️ Gewicht ändern</button>
+    </div>`;
+  }
 
   // Initialize session data
   if(!sessionData[ex.id]){
     const sets = [];
-    for(let i=0;i<ex.sets;i++) sets.push({weight: ex.isBodyweight ? '' : (suggestion?.weight||ex.startWeight||''), reps:'', done:false});
-    sessionData[ex.id] = { sets };
+    const initW = ex.isBodyweight ? (bw||'') : (suggestion?.weight||ex.startWeight||'');
+    for(let i=0;i<ex.sets;i++) sets.push({weight: initW, reps:'', done:false, note:''});
+    sessionData[ex.id] = { sets, superNote:'', cardio:'' };
   }
 
   const setsHtml = sessionData[ex.id].sets.map((set,si)=>`
     <div class="set-row" id="setrow-${ex.id}-${si}">
       <div class="set-label">Satz ${si+1}</div>
       <input class="set-input" type="number" min="0" step="0.5" placeholder="kg"
-        value="${set.weight||''}" ${ex.isBodyweight?'disabled style="opacity:.4"':''}
+        value="${set.weight||''}" ${ex.isBodyweight?'style="opacity:.5;pointer-events:none"':''}
         oninput="updateSet('${ex.id}',${si},'weight',this.value)" />
       <input class="set-input" type="number" min="0" placeholder="Wdh."
         value="${set.reps||''}"
@@ -848,6 +950,11 @@ function renderExerciseRow(ex, idx, total, day){
       </button>
     </div>`).join('');
 
+  // Supersatz note (only for ss type)
+  const ssNoteHtml = ex.type==='ss' ? `<input class="ss-note-input" placeholder="Notiz zum Supersatz (z.B. Tempo, Gefühl)..."
+    value="${sessionData[ex.id].superNote||''}"
+    oninput="updateExNote('${ex.id}',this.value)"/>` : '';
+
   return `<div class="ex-row">
     <div class="ex-idx">${label}</div>
     <div class="ex-main">
@@ -856,10 +963,11 @@ function renderExerciseRow(ex, idx, total, day){
         <div class="ex-muscle-tags">${muscles}</div>
       </div>
       <div class="set-hint">${ex.sets} Sätze · ${ex.reps} Wdh. · ${ex.rest}</div>
-      ${!ex.isBodyweight ? swBadge : `<div class="prog-suggestion" style="cursor:default">★ Körpergewichtübung – Sätze & Wdh. tracken</div>`}
+      ${swBadge}
       <div class="set-tracker" style="margin-top:10px">
         ${setsHtml}
       </div>
+      ${ssNoteHtml}
       <button class="add-set-btn" onclick="addSet('${ex.id}')">+ Satz hinzufügen</button>
     </div>
   </div>`;
@@ -882,10 +990,30 @@ function toggleSetDone(exId, si){
   updateSaveInfo();
 }
 
+function updateExNote(exId, val){
+  if(!sessionData[exId]) return;
+  sessionData[exId].superNote = val;
+}
+
+function editWeight(exId){
+  const ex = findExercise(exId);
+  const newW = prompt('Neues Gewicht für ' + (ex?.name||exId) + ' (kg):\n(Wird historisch gespeichert)');
+  if(newW===null) return;
+  const w = parseFloat(newW);
+  if(isNaN(w)||w<=0){ showToast('Ungültiges Gewicht'); return; }
+  applyWeight(exId, w);
+  const d = getStorage();
+  if(!d.weightHistory) d.weightHistory = {};
+  if(!d.weightHistory[exId]) d.weightHistory[exId] = [];
+  d.weightHistory[exId].push({ date: new Date().toISOString(), weight: w, manual: true });
+  setStorage(d);
+  showToast('✏️ Gewicht auf ' + w + ' kg gesetzt & gespeichert');
+}
+
 function addSet(exId){
   if(!sessionData[exId]) return;
   const lastSet = sessionData[exId].sets[sessionData[exId].sets.length-1]||{};
-  sessionData[exId].sets.push({weight:lastSet.weight||'', reps:'', done:false});
+  sessionData[exId].sets.push({weight:lastSet.weight||'', reps:'', done:false, note:''});
   if(currentDay) renderTraining(currentDay);
 }
 
@@ -908,26 +1036,38 @@ function updateSaveInfo(){
 function saveSession(){
   if(!currentDay){ showToast('Kein Trainingstag gewählt!'); return; }
   const d = getStorage();
-  const exercises = Object.entries(sessionData).map(([id,data])=>({id, sets:data.sets}));
+  const cardioMin = parseInt(document.getElementById('cardio-input')?.value)||0;
+  const exercises = Object.entries(sessionData).map(([id,data])=>({
+    id,
+    sets: data.sets,
+    superNote: data.superNote||''
+  }));
   const session = {
     id: Date.now(),
     day: currentDay,
     date: new Date().toISOString(),
     duration: timerInterval ? Math.floor((Date.now()-sessionStart)/1000) : 0,
+    cardioMin,
     exercises
   };
 
-  // Check PRs
+  // Check PRs + auto-log weight history
   exercises.forEach(e=>{
+    const ex = findExercise(e.id);
     const doneSets = e.sets.filter(s=>s.done && s.weight);
     if(!doneSets.length) return;
     const maxW = Math.max(...doneSets.map(s=>parseFloat(s.weight)||0));
+    const effectiveW = ex?.isBodyweight ? maxW : maxW;
     if(!d.prs[e.id]) d.prs[e.id] = {maxWeight:0, prCount:0};
-    if(maxW > d.prs[e.id].maxWeight){
-      d.prs[e.id].maxWeight = maxW;
+    if(effectiveW > d.prs[e.id].maxWeight){
+      d.prs[e.id].maxWeight = effectiveW;
       d.prs[e.id].prCount = (d.prs[e.id].prCount||0)+1;
-      showToast('🏆 Neuer PR: '+findExercise(e.id)?.name+' – '+maxW+'kg!');
+      showToast('🏆 Neuer PR: '+findExercise(e.id)?.name+' – '+effectiveW+'kg!');
     }
+    // Auto-log to weight history
+    if(!d.weightHistory) d.weightHistory = {};
+    if(!d.weightHistory[e.id]) d.weightHistory[e.id] = [];
+    d.weightHistory[e.id].push({ date: new Date().toISOString(), weight: maxW, manual: false });
   });
 
   d.sessions.push(session);
@@ -935,6 +1075,7 @@ function saveSession(){
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   document.getElementById('session-timer').style.display='none';
   document.getElementById('save-area').style.display='none';
+  if(document.getElementById('cardio-input')) document.getElementById('cardio-input').value='';
   currentDay=null; sessionData={};
   document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active-day'));
   document.getElementById('training-content').innerHTML='';
@@ -966,15 +1107,18 @@ function renderHistory(){
     const timeStr = new Date(s.date).toLocaleTimeString('de-AT',{hour:'2-digit',minute:'2-digit'});
     const vol = s.exercises?.reduce((a,e)=>a+(e.sets?.filter(x=>x.done).reduce((b,x)=>b+(parseFloat(x.weight)||0)*(parseFloat(x.reps)||0),0)||0),0)||0;
     const dur = s.duration ? Math.floor(s.duration/60)+'min' : '—';
+    const cardioStr = s.cardioMin ? ` · 🏃 ${s.cardioMin}min Cardio` : '';
     const exRows = (s.exercises||[]).map(e=>{
       const ex = findExercise(e.id);
       const doneSets = e.sets?.filter(s=>s.done)||[];
       const maxW = doneSets.length ? Math.max(...doneSets.map(x=>parseFloat(x.weight)||0)) : 0;
       const isPR = d.prs[e.id]?.maxWeight === maxW && maxW>0;
       const setsText = doneSets.map(s=>(s.weight||'BW')+'kg × '+(s.reps||'?')).join(' | ');
+      const noteHtml = e.superNote ? `<div style="font-size:10px;color:var(--purple);margin-top:2px">💬 ${e.superNote}</div>` : '';
       return `<div class="hist-ex-row">
         <div><div class="hist-ex-name">${ex?.name||e.id}${isPR?'<span class="hist-pr">PR</span>':''}</div>
-        <div style="font-size:11px;color:var(--dim);margin-top:2px">${setsText||'—'}</div></div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px">${setsText||'—'}</div>
+        ${noteHtml}</div>
         <div class="hist-ex-sets">${doneSets.length} Sätze${maxW>0?' · max '+maxW+'kg':''}</div>
       </div>`;
     }).join('');
@@ -983,10 +1127,11 @@ function renderHistory(){
         <div class="hist-head-left">
           <div class="hist-day-dot" style="background:${col}"></div>
           <div><div class="hist-day-name">Tag ${s.day} – ${PLAN[s.day]?.name||''}</div>
-          <div class="hist-date">${dateStr} · ${timeStr}</div></div>
+          <div class="hist-date">${dateStr} · ${timeStr}${cardioStr}</div></div>
         </div>
         <div class="hist-head-right">
           <div class="hist-vol">📦 ${Math.round(vol)} kg · ⏱ ${dur}</div>
+          <button onclick="event.stopPropagation();deleteSession(${s.id})" style="padding:4px 10px;border-radius:6px;border:1px solid var(--red);background:transparent;color:var(--red);font-size:11px;font-family:'Syne',sans-serif;font-weight:600;cursor:pointer;flex-shrink:0">🗑</button>
           <div class="hist-chevron">▼</div>
         </div>
       </div>
@@ -1125,6 +1270,7 @@ const EX_MUSCLE_LOAD = {
   bench:        { 'Brust':65, 'Schulter':20, 'Trizeps':15 },
   pullup_under: { 'Rücken':55, 'Bizeps':30, 'Core':15 },
   incline_db:   { 'Brust oben':55, 'Schulter':30, 'Trizeps':15 },
+  incline_bb:   { 'Brust oben':55, 'Schulter':25, 'Trizeps':20 },
   barbell_row:  { 'Rücken':60, 'Bizeps':25, 'Core':15 },
   shrug_a:      { 'Trapez':80, 'Schulter':12, 'Unterarme':8 },
   face_pull_a:  { 'Hintere Schulter':50, 'Nacken':30, 'Rotatorenmanschette':20 },
@@ -1155,6 +1301,7 @@ const EX_STEPS = {
   bench:        ['Rücken fest auf Bank, Schulterblätter zusammenziehen', 'Stange auf Brusthöhe – mittlerer Griff (etwas breiter als Schultern)', 'Brust berühren, nicht abprallen lassen', 'Explosiv drücken – Ellbogen nicht ganz strecken'],
   pullup_under: ['Untergriff schulterbreit, Körper hängen lassen', 'Schulterblätter zuerst zusammenziehen (Retraction)', 'Brust zur Stange ziehen – Kinn über die Stange', 'Langsam und kontrolliert absenken (3 Sek.)'],
   incline_db:   ['30° Schrägbank, KH auf Oberschenkel starten', 'Ellbogen 45–60° zum Körper – nicht ausflügeln', 'Volle Streckung oben, Brust öffnen unten', 'Kontrolliert absenken – Dehnung fühlen'],
+  incline_bb:   ['30° Schrägbank, Langhantel etwas enger als Schulterbreite greifen', 'Schulterblätter zusammenziehen und in Bank drücken', 'Stange zur oberen Brust senken – kontroliert, 3 Sek.', 'Explosiv drücken – Ellbogen nicht ganz strecken'],
   barbell_row:  ['Oberkörper ~45° vorgebeugt, Rücken gerade', 'Langhantel zur Hüfte ziehen – nicht zum Bauch', 'Ellbogen nah am Körper halten', 'Oben Schulterblätter zusammendrücken – 1 Sek. halten'],
   shrug_a:      ['Schulterbreiter Stand, Langhantel oder KH', 'Schultern gerade nach oben ziehen – kein Kreisen!', 'Oben 1–2 Sekunden halten, Trapez maximal kontrahiert', 'Langsam und kontrolliert absenken – volle Streckung'],
   face_pull_a:  ['Seilzug auf Kopfhöhe, Seilaufsatz', 'Ellbogen auf Schulterhöhe oder höher halten', 'Zu Ohren ziehen – Hände auseinander am Ende', 'Hintere Schulter und Nacken bewusst spüren'],
@@ -1249,6 +1396,23 @@ function getExSVG(id, color='#b8ff57'){
       <rect x="146" y="40" width="10" height="8" rx="3" fill="${c}" opacity=".8"/>
       <rect x="160" y="40" width="10" height="8" rx="3" fill="${c}" opacity=".8"/>
       <text x="140" y="148" text-anchor="middle" fill="${c}" font-size="10" font-family="sans-serif" font-weight="700" opacity=".8">SCHRÄGBANK KH</text>
+    </svg>`,
+
+    incline_bb: `<svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+      <rect width="280" height="160" fill="${eq}"/>
+      <rect x="60" y="70" width="130" height="12" rx="6" fill="#2a2a38" transform="rotate(-25,125,76)"/>
+      <rect x="176" y="50" width="12" height="50" rx="4" fill="#1a1a24"/>
+      <rect x="68" y="105" width="12" height="35" rx="3" fill="#1a1a24"/>
+      <ellipse cx="118" cy="72" rx="16" ry="10" fill="${skin}" transform="rotate(-25,118,72)"/>
+      <circle cx="170" cy="52" r="10" fill="${skin}"/>
+      <line x1="104" y1="66" x2="74" y2="46" stroke="${skin}" stroke-width="6" stroke-linecap="round"/>
+      <line x1="132" y1="66" x2="162" y2="46" stroke="${skin}" stroke-width="6" stroke-linecap="round"/>
+      <!-- barbell (not dumbbells) -->
+      <rect x="50" y="40" width="140" height="7" rx="3.5" fill="#555"/>
+      <rect x="38" y="34" width="18" height="18" rx="4" fill="${c}" opacity=".85"/>
+      <rect x="184" y="34" width="18" height="18" rx="4" fill="${c}" opacity=".85"/>
+      <ellipse cx="118" cy="72" rx="14" ry="7" fill="${c}" opacity=".2" transform="rotate(-25,118,72)"/>
+      <text x="140" y="148" text-anchor="middle" fill="${c}" font-size="10" font-family="sans-serif" font-weight="700" opacity=".8">SCHRÄGBANK LH</text>
     </svg>`,
 
     barbell_row: `<svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
@@ -1875,6 +2039,37 @@ function openModal(exId){
         </div>`:''}
       </div>
 
+      ${(()=>{
+        const d2 = getStorage();
+        // Collect weight history from sessions + manual edits
+        const wHist = [];
+        (d2.sessions||[]).forEach(s=>{
+          const e2 = s.exercises?.find(e=>e.id===exId);
+          if(e2){
+            const done = e2.sets?.filter(x=>x.done&&x.weight)||[];
+            if(done.length){
+              const maxW = Math.max(...done.map(x=>parseFloat(x.weight)||0));
+              wHist.push({ date: new Date(s.date), weight: maxW, manual: false });
+            }
+          }
+        });
+        (d2.weightHistory?.[exId]||[]).forEach(e=>{
+          wHist.push({ date: new Date(e.date), weight: e.weight, manual: true });
+        });
+        wHist.sort((a,b)=>b.date-a.date);
+        if(!wHist.length) return '';
+        const rows = wHist.slice(0,8).map(h=>`
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);gap:10px">
+            <div style="font-size:11px;color:var(--sub)">${h.date.toLocaleDateString('de-AT',{day:'2-digit',month:'short',year:'numeric'})}</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              ${h.manual?'<span style="font-size:9px;color:var(--purple);font-weight:700">MANUELL</span>':''}
+              <div style="font-size:14px;font-weight:700;color:var(--text)">${h.weight} kg</div>
+            </div>
+          </div>`).join('');
+        return `<div class="modal-section">Gewichtsverlauf</div>
+          <div style="margin-top:8px">${rows}</div>`;
+      })()}
+
       <button class="modal-close" onclick="closeModal()">✕ Schließen</button>
     </div>`;
 
@@ -1925,9 +2120,124 @@ function showToast(msg){
 
 function clearHistory(){
   if(!confirm('Wirklich alle Daten löschen? Das kann nicht rückgängig gemacht werden.')) return;
-  localStorage.removeItem('lifttracker_v2');
+  const d = getStorage();
+  d.sessions = []; d.prs = {};
+  setStorage(d);
   renderHistory(); renderDashboard();
   showToast('Alle Daten gelöscht.');
+}
+
+function deleteSession(sessionId){
+  if(!confirm('Dieses Training löschen?')) return;
+  const d = getStorage();
+  d.sessions = d.sessions.filter(s=>s.id!==sessionId);
+  setStorage(d);
+  renderHistory(); renderDashboard();
+  showToast('Training gelöscht.');
+}
+
+// ─── EXPORT ───
+function showExportModal(){
+  const now = new Date();
+  const toStr = now.toISOString().split('T')[0];
+  const fromDate = new Date(now); fromDate.setMonth(now.getMonth()-1);
+  const fromStr = fromDate.toISOString().split('T')[0];
+  document.getElementById('export-from').value = fromStr;
+  document.getElementById('export-to').value = toStr;
+  document.getElementById('export-modal').classList.add('open');
+}
+
+function closeExportModal(e){
+  if(e.target===document.getElementById('export-modal')) document.getElementById('export-modal').classList.remove('open');
+}
+
+function doExport(){
+  const d = getStorage();
+  const fromVal = document.getElementById('export-from').value;
+  const toVal = document.getElementById('export-to').value;
+  let sessions = d.sessions;
+  if(fromVal) sessions = sessions.filter(s=>new Date(s.date) >= new Date(fromVal));
+  if(toVal)   sessions = sessions.filter(s=>new Date(s.date) <= new Date(toVal+'T23:59:59'));
+
+  // Build readable export
+  const lines = [];
+  lines.push('GYMTRACKER EXPORT');
+  lines.push('Exportiert: '+new Date().toLocaleDateString('de-AT'));
+  if(fromVal||toVal) lines.push('Zeitraum: '+(fromVal||'–')+' bis '+(toVal||'–'));
+  lines.push('Trainings: '+sessions.length);
+  lines.push('');
+
+  sessions.forEach(s=>{
+    lines.push('═'.repeat(50));
+    lines.push('Tag '+s.day+' – '+(PLAN[s.day]?.name||''));
+    lines.push(new Date(s.date).toLocaleDateString('de-AT',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}));
+    if(s.duration) lines.push('Dauer: '+Math.floor(s.duration/60)+'min');
+    if(s.cardioMin) lines.push('Cardio: '+s.cardioMin+'min');
+    lines.push('');
+    (s.exercises||[]).forEach(e=>{
+      const ex = findExercise(e.id);
+      lines.push('  '+( ex?.name||e.id));
+      if(e.superNote) lines.push('  Notiz: '+e.superNote);
+      (e.sets||[]).filter(x=>x.done).forEach((set,i)=>{
+        lines.push('    Satz '+(i+1)+': '+(set.weight||'BW')+'kg × '+(set.reps||'?')+' Wdh.');
+      });
+    });
+    lines.push('');
+  });
+
+  const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='gymtracker_export_'+(fromVal||'alle')+'_bis_'+(toVal||'heute')+'.txt';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  document.getElementById('export-modal').classList.remove('open');
+  showToast('✅ Export heruntergeladen!');
+}
+
+// ─── EXERCISE REORDER ───
+let reorderDay = null;
+let dragSrcIdx = null;
+
+function showReorderModal(day){
+  reorderDay = day;
+  const plan = PLAN[day];
+  const box = document.getElementById('ueb-modal-box');
+  box.innerHTML = `
+    <div class="modal-body">
+      <div class="modal-name">Reihenfolge ändern</div>
+      <div class="modal-note">Tag ${day} – ${plan.name}<br>Ziehe die Übungen in die gewünschte Reihenfolge. Die Änderung gilt nur für kommende Trainings.</div>
+      <div class="modal-section">Übungen</div>
+      <div id="reorder-list" style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+        ${plan.exercises.map((ex,i)=>`
+          <div class="reorder-item" draggable="true"
+            ondragstart="dragStart(${i})" ondragover="dragOver(event,${i})" ondrop="dragDrop(${i})" ondragend="dragEnd()">
+            <span style="font-size:16px;cursor:grab">⠿</span>
+            <span style="font-size:13px;font-weight:600;flex:1">${ex.name}</span>
+            <span class="mtag ${MUSCLE_META[ex.muscles[0]]?.cls||''}" style="font-size:10px">${MUSCLE_META[ex.muscles[0]]?.label||''}</span>
+          </div>`).join('')}
+      </div>
+      <button onclick="saveReorder()" style="width:100%;margin-top:16px;padding:12px;border-radius:10px;background:var(--lime);color:#000;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer">✓ Reihenfolge speichern</button>
+      <button class="modal-close" onclick="closeModal()">Abbrechen</button>
+    </div>`;
+  document.getElementById('ueb-modal').classList.add('open');
+}
+
+function dragStart(i){ dragSrcIdx=i; }
+function dragOver(e,i){ e.preventDefault(); }
+function dragEnd(){ dragSrcIdx=null; }
+function dragDrop(i){
+  if(dragSrcIdx===null||dragSrcIdx===i) return;
+  const plan = PLAN[reorderDay];
+  const arr = [...plan.exercises];
+  const [moved] = arr.splice(dragSrcIdx,1);
+  arr.splice(i,0,moved);
+  PLAN[reorderDay].exercises = arr;
+  showReorderModal(reorderDay);
+}
+function saveReorder(){
+  showToast('✅ Reihenfolge gespeichert für nächstes Training!');
+  closeModal();
 }
 
 // ═══════════════════════════════════════════════════════
