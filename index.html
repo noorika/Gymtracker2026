@@ -36,7 +36,7 @@ html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;display:flex;flex-direction:column;}
 
 /* ─── NAV ─── */
-nav{flex-shrink:0;position:relative;z-index:100;background:rgba(7,7,9,.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:58px}
+nav{flex-shrink:0;position:relative;z-index:100;background:rgba(7,7,9,.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;padding-top:env(safe-area-inset-top);height:calc(58px + env(safe-area-inset-top))}
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.08em;color:var(--lime)}
 .nav-logo span{color:var(--sub);font-size:14px;letter-spacing:.2em;font-family:'Syne',sans-serif;margin-left:10px;font-weight:400}
 .nav-tabs{display:flex;gap:4px}
@@ -154,7 +154,7 @@ nav{flex-shrink:0;position:relative;z-index:100;background:rgba(7,7,9,.98);backd
 .add-set-btn:hover{border-color:var(--border2);color:var(--text)}
 
 /* save session btn */
-.save-session-area{flex-shrink:0;display:none;align-items:center;justify-content:space-between;padding:14px 32px;background:rgba(7,7,9,.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);gap:16px;flex-wrap:wrap}
+.save-session-area{flex-shrink:0;display:none;align-items:center;justify-content:space-between;padding:14px 32px;padding-bottom:calc(14px + env(safe-area-inset-bottom));background:rgba(7,7,9,.98);backdrop-filter:blur(20px);border-top:1px solid var(--border);gap:16px;flex-wrap:wrap}
 .save-btn{padding:12px 32px;border-radius:10px;background:var(--lime);color:#000;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .2s;letter-spacing:.04em}
 .save-btn:hover{background:var(--lime2);transform:translateY(-1px)}
 .save-btn:active{transform:translateY(0)}
